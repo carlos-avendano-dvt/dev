@@ -79,9 +79,9 @@ explore: orders {}
 explore: events {}
 
 explore: users {
-  always_filter: {
-   filters: [age: "20"]
-   }
+  # always_filter: {
+  # filters: [age: "20"]
+  # }
    # sql_always_where: ${age}=20 ;;
 }
 
@@ -133,6 +133,28 @@ explore: order_items {
 
 }
 
+explore: order_items_2 {
+  extends: [order_items]
+  view_name: order_items
+  label: "Order Items (Users > 30)"
+  sql_always_where: ${users.age} > 30 ;;
+}
+
+explore: order_items_3 {
+    label: "Order Items and Details"
+    view_name: order_items
+    join: order_details {
+      type:  left_outer
+      sql_on: ${order_items.order_id} = ${order_details.order_id} ;;
+      relationship: many_to_one
+    }
+    join: users {
+      type: left_outer
+      sql_on: ${order_items.user_id} = ${users.id} ;;
+      relationship: many_to_one
+  }
+}
+
 explore: renta_municipios_refined {}
 explore: ccaa_esperanza_vida_refined{}
 explore: ccaa_ejercicio_refined {}
@@ -154,7 +176,7 @@ join: within_periods {
   type: left_outer
   relationship: one_to_many
   fields: []
-  sql_on: ${within_periods.n} <= (
+  sql_on: ${within_periods.n} < (
     CASE
       WHEN {% parameter pop_method_8.within_period_type %} = 'hour' THEN
         (TIMESTAMP_DIFF(
@@ -334,23 +356,6 @@ explore: flexible_pop {
     );;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
