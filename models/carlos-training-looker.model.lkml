@@ -158,6 +158,11 @@ explore: order_items_3 {
 explore: renta_municipios_refined {}
 explore: ccaa_esperanza_vida_refined{}
 explore: ccaa_ejercicio_refined {}
+
+
+
+
+
 explore: flexible_pop8 {
   label: "LPoP Method 8: Flexible implementation to compare any period to any other"
   from:  pop_method_8
