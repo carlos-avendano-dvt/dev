@@ -36,4 +36,5 @@ view: common_criteria {
   measure: count {
     type: count
   }
+
 }
