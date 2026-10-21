@@ -6,6 +6,7 @@ include: "//Sports/views/**/*.view"
 include: "/views/**/*.view.lkml"
 include: "/derived_tables/**/*.view.lkml"
 include: "/dashboards/*.dashboard.lookml"
+include: "/agentic_dashboards/*.dashboard.lookml"
 # Datagroups define a caching policy for an Explore. To learn more,
 # use the Quick Help panel on the right to see documentation.
 
@@ -361,35 +362,6 @@ explore: flexible_pop {
     );;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 access_grant: access_organizacion {
   user_attribute: organizacion

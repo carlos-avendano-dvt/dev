@@ -7,6 +7,7 @@
   var lookerChannel = null;
   var msgSeq = 0;
   var pendingRequests = {};
+  var visContainerElement = null;
 
   function initLookerExtensionHandshake() {
     try {
@@ -302,6 +303,8 @@
     }
   };
 
+  var AVAILABLE_MONTHS = ["2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12"];
+
   var MONTHLY_DATA = [
     { month: "2026-12", region: "China", orders: 1601, revenue: 132739.15, buyers: 1120 },
     { month: "2026-12", region: "United States", orders: 1097, revenue: 93613.07, buyers: 780 },
@@ -479,11 +482,11 @@
     style.textContent = [
       "* { box-sizing: border-box; }",
       "html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }",
-      ".cc-wrap { min-height: 100vh; padding: 24px 28px; transition: background 0.2s, color 0.2s; }",
+      ".cc-wrap { min-height: 100vh; padding: 20px 24px; transition: background 0.2s, color 0.2s; }",
       ".cc-light { background: #f8fafc; color: #1e293b; }",
       ".cc-dark { background: #0b0f19; color: #f1f5f9; }",
-      ".cc-container { max-width: 1440px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }",
-      ".cc-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(148, 163, 184, 0.2); }",
+      ".cc-container { max-width: 1440px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }",
+      ".cc-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid rgba(148, 163, 184, 0.2); }",
       ".cc-title-row { display: flex; align-items: center; gap: 10px; }",
       ".cc-title { font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.02em; }",
       ".cc-subtitle { font-size: 12px; opacity: 0.65; margin: 4px 0 0 0; }",
@@ -535,16 +538,20 @@
   }
 
   // ============================================================================
-  // 4. RENDER APPLICATION INTO DOCUMENT.BODY
+  // 4. RENDER APPLICATION INTO HOST CONTAINER OR DOCUMENT.BODY
   // ============================================================================
   function renderApp() {
     injectStyles();
+    var host = visContainerElement || document.body;
     var root = document.getElementById("cc-root");
-    if (!root) {
+    if (!root || root.parentNode !== host) {
+      if (root && root.parentNode) {
+        root.parentNode.removeChild(root);
+      }
       root = document.createElement("div");
       root.id = "cc-root";
-      document.body.innerHTML = "";
-      document.body.appendChild(root);
+      host.innerHTML = "";
+      host.appendChild(root);
     }
 
     var items = getAggregatedItems();
@@ -562,7 +569,7 @@
     var dashOffset = circumference - (Math.min(100, quotaPct) / 100) * circumference;
     var maxRev = items[0] ? items[0].revenue : 1;
 
-    var months = ["2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11", "2026-12"];
+    var months = AVAILABLE_MONTHS;
 
     var personasHtml = items.slice(0, 5).map(function (item, idx) {
       var meta = PERSONAS[item.region] || {
@@ -679,14 +686,13 @@
     root.innerHTML =
       '<div class="cc-wrap ' + (appState.darkMode ? "cc-dark" : "cc-light") + '">' +
         '<div class="cc-container">' +
-          // Header & Toolbar
           '<div class="cc-header">' +
             '<div>' +
               '<div class="cc-title-row">' +
                 '<span style="font-size:24px;">⚡</span>' +
                 '<h1 class="cc-title">Regional Revenue &amp; Orders Command Center</h1>' +
               '</div>' +
-              '<p class="cc-subtitle">Top Regions &amp; Markets · Model: <code>carlos-training-looker</code> · Explore: <code>order_items</code></p>' +
+              '<p class="cc-subtitle">Top Regions &amp; Markets · Model: <code>carlos-training-looker</code> · Explore: <code>order_items</code> · Folder: <code>agentic dashboards</code></p>' +
             '</div>' +
             '<div class="cc-controls">' +
               '<button id="cc-btn-tetris" class="cc-btn cc-btn-tetris">🎮 Play Region Tetris</button>' +
@@ -731,7 +737,6 @@
             '</div>' +
           '</div>' +
 
-          // Top 5 Regional Personas
           '<div>' +
             '<div class="cc-section-hdr">' +
               '<h2 class="cc-section-title">🌍 Top Regional Personas &amp; Markets <span style="font-size:12px;font-weight:400;opacity:0.6;">(Click card to cross-filter entire dashboard)</span></h2>' +
@@ -742,7 +747,6 @@
             '<div class="cc-personas-grid">' + personasHtml + '</div>' +
           '</div>' +
 
-          // 4 KPI Cards
           '<div class="cc-kpi-grid">' +
             '<div class="cc-kpi-card cc-surface">' +
               '<div class="cc-kpi-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6;">📦</div>' +
@@ -774,7 +778,6 @@
             '</div>' +
           '</div>' +
 
-          // Primary Bar Chart: Ingresos por Región
           '<div class="cc-card-box cc-surface">' +
             '<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;">' +
               '<div>' +
@@ -786,7 +789,6 @@
             '<div>' + barsHtml + '</div>' +
           '</div>' +
 
-          // Bottom Grid: Solid Gauge + Squarified Treemap
           '<div class="cc-bottom-grid">' +
             '<div class="cc-card-box cc-surface" style="display:flex;flex-direction:column;justify-content:space-between;">' +
               '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">' +
@@ -824,7 +826,6 @@
       '</div>' +
       tetrisModalHtml;
 
-    // Bind interactive events
     var toggleRegion = function (r) {
       playTone(r ? 660 : 440);
       appState.selectedRegion = appState.selectedRegion === r ? null : r;
@@ -930,7 +931,78 @@
     }
   }
 
-  function boot() {
+  // ============================================================================
+  // 5. REGISTER AS LOOKER CUSTOM VISUALIZATION (FOR DASHBOARD #414) + EXTENSION
+  // ============================================================================
+  if (window.looker && window.looker.plugins && window.looker.plugins.visualizations) {
+    window.looker.plugins.visualizations.add({
+      id: "regional_command_center_vis",
+      label: "⚡ Regional Revenue & Orders Command Center",
+      options: {},
+      create: function (element, config) {
+        element.style.padding = "0";
+        element.style.margin = "0";
+        element.style.width = "100%";
+        element.style.height = "100%";
+        element.style.overflowY = "auto";
+        visContainerElement = element;
+        renderApp();
+      },
+      updateAsync: function (data, element, config, queryResponse, details, done) {
+        visContainerElement = element;
+        try {
+          if (Array.isArray(data) && data.length > 0) {
+            var parsed = [];
+            for (var i = 0; i < data.length; i++) {
+              var r = data[i];
+              var countryCell = r["users.country"] || r["users.state"];
+              var revCell = r["order_items.total_revenue"];
+              var ordCell = r["order_items.order_count"];
+              var monthCell = r["order_items.created_month"];
+              var regionVal = countryCell && countryCell.value !== undefined ? countryCell.value : null;
+              var revVal = revCell && revCell.value !== undefined ? Number(revCell.value) : 0;
+              var ordVal = ordCell && ordCell.value !== undefined ? Number(ordCell.value) : Math.max(1, Math.round(revVal / 85));
+              var monthVal = monthCell && monthCell.value !== undefined ? String(monthCell.value) : null;
+              if (regionVal && revVal > 0 && monthVal) {
+                parsed.push({
+                  month: monthVal,
+                  region: String(regionVal),
+                  orders: ordVal,
+                  revenue: revVal,
+                  buyers: Math.max(1, Math.round(ordVal * 0.7))
+                });
+              }
+            }
+            if (parsed.length > 5) {
+              MONTHLY_DATA = parsed;
+              var uniqueMonths = [];
+              for (var j = 0; j < parsed.length; j++) {
+                if (uniqueMonths.indexOf(parsed[j].month) === -1) {
+                  uniqueMonths.push(parsed[j].month);
+                }
+              }
+              uniqueMonths.sort();
+              if (uniqueMonths.length > 0) {
+                AVAILABLE_MONTHS = uniqueMonths;
+                if (uniqueMonths.indexOf(appState.startMonth) === -1) {
+                  appState.startMonth = uniqueMonths[0];
+                }
+                if (uniqueMonths.indexOf(appState.endMonth) === -1) {
+                  appState.endMonth = uniqueMonths[uniqueMonths.length - 1];
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("Vis data parse warning:", err);
+        }
+        renderApp();
+        if (typeof done === "function") {
+          done();
+        }
+      }
+    });
+  } else {
     initLookerExtensionHandshake();
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", renderApp);
@@ -938,6 +1010,4 @@
       renderApp();
     }
   }
-
-  boot();
 })();

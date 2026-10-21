@@ -1,8 +1,19 @@
 project_name: "carlos-training-looker"
 
+visualization: {
+  id: "regional_command_center_vis"
+  label: "⚡ Regional Revenue & Orders Command Center"
+  file: "agentic_dashboards/command_center_bundle.js"
+}
+
 application: regional_command_center {
   label: "⚡ Regional Revenue & Orders Command Center"
-  file: "command_center_bundle.js"
+  file: "agentic_dashboards/command_center_bundle.js"
+  mount_points: {
+    dashboard_vis: yes
+    dashboard_tile: yes
+    standalone: yes
+  }
   entitlements: {
     local_storage: yes
     navigation: yes
